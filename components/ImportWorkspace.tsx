@@ -8,6 +8,7 @@ import {
   CheckCircle2,
   Download,
   FileSpreadsheet,
+  Loader2,
   ShieldCheck,
   UploadCloud,
   XCircle,
@@ -16,6 +17,8 @@ import {
 type ProductField = "name" | "category" | "price" | "stock" | "status" | "ignore";
 type RowState = "ready" | "warning" | "error";
 type CsvRow = Record<string, string>;
+type Organization = { id: string; name: string };
+type PromotionResult = { job_id: string; promoted: number; duplicates: number; errors: number };
 
 const requiredFields: ProductField[] = ["name", "category", "price", "stock"];
 const fieldLabels: Record<ProductField, string> = {
@@ -56,7 +59,7 @@ function guessField(header: string): ProductField {
   return "ignore";
 }
 
-export default function ImportWorkspace() {
+export default function ImportWorkspace({ organizations }: { organizations: Organization[] }) {
   const [step, setStep] = useState(1);
   const [fileName, setFileName] = useState("pawshop-products-july.csv");
   const [csv, setCsv] = useState(sampleCsv);
@@ -65,6 +68,10 @@ export default function ImportWorkspace() {
     Object.fromEntries(parseCsv(sampleCsv).headers.map((header) => [header, guessField(header)])),
   );
   const [promoted, setPromoted] = useState(false);
+  const [organizationId, setOrganizationId] = useState(organizations[0]?.id ?? "");
+  const [isPromoting, setIsPromoting] = useState(false);
+  const [promotionError, setPromotionError] = useState("");
+  const [promotionResult, setPromotionResult] = useState<PromotionResult | null>(null);
 
   const mappedValue = (row: CsvRow, field: ProductField) => {
     const header = Object.keys(mapping).find((key) => mapping[key] === field);
@@ -124,6 +131,44 @@ export default function ImportWorkspace() {
     URL.revokeObjectURL(url);
   }
 
+  async function promoteImport() {
+    if (!organizationId) {
+      setPromotionError("Choose a workspace before promoting this import.");
+      return;
+    }
+    setIsPromoting(true);
+    setPromotionError("");
+    const rows = reviewedRows.map((item) => ({
+      row_number: item.index,
+      status: item.state === "warning" ? "duplicate" : item.state,
+      message: item.message,
+      payload: {
+        name: mappedValue(item.row, "name"),
+        category: mappedValue(item.row, "category"),
+        price: mappedValue(item.row, "price"),
+        stock: mappedValue(item.row, "stock"),
+        status: mappedValue(item.row, "status") || "active",
+      },
+    }));
+
+    try {
+      const response = await fetch("/api/imports/promote", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ organization_id: organizationId, file_name: fileName, mapping, rows }),
+      });
+      const result = await response.json();
+      if (!response.ok) throw new Error(result.error || "Promotion failed");
+      setPromotionResult(result);
+      setPromoted(true);
+      setStep(4);
+    } catch (error) {
+      setPromotionError(error instanceof Error ? error.message : "Promotion failed");
+    } finally {
+      setIsPromoting(false);
+    }
+  }
+
   return (
     <div className="mx-auto max-w-6xl" data-testid="import-workspace">
       <div className="mb-8 flex flex-col justify-between gap-4 sm:flex-row sm:items-end">
@@ -134,9 +179,13 @@ export default function ImportWorkspace() {
           <h1 className="text-3xl font-bold tracking-tight text-slate-950">Import product data</h1>
           <p className="mt-2 text-sm text-slate-500">Validate every row before anything reaches production.</p>
         </div>
-        <div className="rounded-lg border border-slate-200 bg-white px-3 py-2 text-xs text-slate-500 shadow-sm">
-          Workspace <span className="ml-1 font-semibold text-slate-800">PawShop US</span>
-        </div>
+        <label className="flex items-center rounded-lg border border-slate-200 bg-white px-3 py-2 text-xs text-slate-500 shadow-sm">
+          Workspace
+          <select aria-label="Import workspace" value={organizationId} onChange={(event) => setOrganizationId(event.target.value)} className="ml-1 bg-transparent font-semibold text-slate-800 outline-none">
+            {organizations.length === 0 && <option value="">No workspace available</option>}
+            {organizations.map((organization) => <option key={organization.id} value={organization.id}>{organization.name}</option>)}
+          </select>
+        </label>
       </div>
 
       <ol className="mb-8 grid grid-cols-4 overflow-hidden rounded-xl border border-slate-200 bg-white shadow-sm">
@@ -234,7 +283,7 @@ export default function ImportWorkspace() {
         <section className="card px-6 py-16 text-center" data-testid="import-complete">
           <span className="mx-auto flex h-16 w-16 items-center justify-center rounded-full bg-emerald-100 text-emerald-600"><CheckCircle2 size={32} /></span>
           <h2 className="mt-5 text-2xl font-bold text-slate-950">Import promoted safely</h2>
-          <p className="mx-auto mt-2 max-w-md text-sm leading-6 text-slate-500">{counts.ready} products moved from staging to production. {counts.warning + counts.error} blocked rows remain available for audit.</p>
+          <p className="mx-auto mt-2 max-w-md text-sm leading-6 text-slate-500">{promotionResult?.promoted ?? counts.ready} products moved from staging to production. {(promotionResult?.duplicates ?? counts.warning) + (promotionResult?.errors ?? counts.error)} blocked rows remain available for audit.</p>
           <div className="mx-auto mt-6 inline-flex items-center gap-2 rounded-lg bg-slate-50 px-4 py-3 text-xs text-slate-600 ring-1 ring-slate-200"><ShieldCheck size={15} className="text-indigo-600" /> Transaction committed · duplicate-safe · tenant scoped</div>
         </section>
       )}
@@ -242,8 +291,8 @@ export default function ImportWorkspace() {
       <div className="mt-6 flex items-center justify-between">
         <button className="btn-secondary disabled:invisible" disabled={step === 1 || step === 4} onClick={() => setStep((value) => value - 1)}><ArrowLeft size={16} /> Back</button>
         {step < 3 && <button data-testid="import-next" className="btn-primary" disabled={step === 2 && !mappingComplete} onClick={() => setStep((value) => value + 1)}>Continue <ArrowRight size={16} /></button>}
-        {step === 3 && <button data-testid="promote-import" className="btn-primary" onClick={() => { setPromoted(true); setStep(4); }}>Promote {counts.ready} valid rows <ArrowRight size={16} /></button>}
-        {step === 4 && promoted && <button className="btn-secondary" onClick={() => { setPromoted(false); setStep(1); }}>Start another import</button>}
+        {step === 3 && <div className="flex flex-col items-end gap-2">{promotionError && <p className="text-sm text-rose-600" role="alert">{promotionError}</p>}<button data-testid="promote-import" className="btn-primary" disabled={isPromoting || !organizationId} onClick={promoteImport}>{isPromoting ? <><Loader2 size={16} className="animate-spin" /> Promoting…</> : <>Promote {counts.ready} valid rows <ArrowRight size={16} /></>}</button></div>}
+        {step === 4 && promoted && <button className="btn-secondary" onClick={() => { setPromoted(false); setPromotionResult(null); setStep(1); }}>Start another import</button>}
       </div>
     </div>
   );
