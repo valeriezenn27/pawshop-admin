@@ -2,7 +2,7 @@ export const dynamic = "force-dynamic";
 
 import Link from "next/link";
 import { Plus } from "lucide-react";
-import { supabase } from "@/lib/supabase";
+import { createClient } from "@/lib/supabase/server";
 import ProductTable from "@/components/ProductTable";
 import SearchFilter from "@/components/SearchFilter";
 import { Suspense } from "react";
@@ -16,6 +16,7 @@ interface ProductsPageProps {
 }
 
 async function getProducts(search: string, status: string) {
+  const supabase = await createClient();
   let query = supabase
     .from("products")
     .select("*")

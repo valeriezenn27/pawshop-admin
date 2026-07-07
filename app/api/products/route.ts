@@ -1,9 +1,10 @@
 import { NextRequest, NextResponse } from "next/server";
-import { supabase } from "@/lib/supabase";
+import { createClient } from "@/lib/supabase/server";
 import type { ProductFormData } from "@/lib/types";
 
 export async function GET(request: NextRequest) {
   try {
+    const supabase = await createClient();
     const { searchParams } = new URL(request.url);
     const search = searchParams.get("search") ?? "";
     const status = searchParams.get("status") ?? "";
@@ -34,9 +35,25 @@ export async function GET(request: NextRequest) {
 
 export async function POST(request: NextRequest) {
   try {
+    const supabase = await createClient();
+    const { data: { user } } = await supabase.auth.getUser();
+    if (!user) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     const body: ProductFormData = await request.json();
 
     const { name, category, price, stock, status, image_url, description } = body;
+    const requestedOrganizationId = (body as ProductFormData & { organization_id?: string }).organization_id;
+    let organizationId = requestedOrganizationId;
+    if (!organizationId) {
+      const { data: membership } = await supabase
+        .from("organization_members")
+        .select("organization_id")
+        .limit(1)
+        .maybeSingle();
+      organizationId = membership?.organization_id;
+    }
+    if (!organizationId) {
+      return NextResponse.json({ error: "Choose an organization before adding a product" }, { status: 400 });
+    }
 
     if (!name?.trim()) {
       return NextResponse.json({ error: "Product name is required" }, { status: 400 });
@@ -51,6 +68,7 @@ export async function POST(request: NextRequest) {
     const { data, error } = await supabase
       .from("products")
       .insert({
+        organization_id: organizationId,
         name: name.trim(),
         category,
         price,

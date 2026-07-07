@@ -3,7 +3,7 @@
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
-import type { Product, ProductFormData } from "@/lib/types";
+import type { OrganizationOption, Product, ProductFormData } from "@/lib/types";
 
 const CATEGORIES = [
   "Shampoo & Grooming",
@@ -19,6 +19,7 @@ const CATEGORIES = [
 interface ProductFormProps {
   initialData?: Product;
   isEdit?: boolean;
+  organizations?: OrganizationOption[];
 }
 
 const defaultFormData: ProductFormData = {
@@ -31,7 +32,7 @@ const defaultFormData: ProductFormData = {
   description: "",
 };
 
-export default function ProductForm({ initialData, isEdit = false }: ProductFormProps) {
+export default function ProductForm({ initialData, isEdit = false, organizations = [] }: ProductFormProps) {
   const router = useRouter();
   const [formData, setFormData] = useState<ProductFormData>(
     initialData
@@ -52,6 +53,10 @@ export default function ProductForm({ initialData, isEdit = false }: ProductForm
 
   function validate(): boolean {
     const newErrors: Partial<Record<keyof ProductFormData, string>> = {};
+
+    if (!isEdit && organizations.length > 0 && !formData.organization_id) {
+      newErrors.organization_id = "Workspace is required";
+    }
 
     if (!formData.name.trim()) {
       newErrors.name = "Product name is required";
@@ -132,6 +137,17 @@ export default function ProductForm({ initialData, isEdit = false }: ProductForm
 
       <div className="card p-6 space-y-5">
         <h2 className="text-base font-semibold text-gray-900">Product Details</h2>
+
+        {!isEdit && organizations.length > 0 && (
+          <div>
+            <label htmlFor="organization_id" className="form-label">Workspace <span className="text-red-500">*</span></label>
+            <select id="organization_id" name="organization_id" className="form-input" required value={formData.organization_id ?? ""} onChange={handleChange} data-testid="input-organization">
+              <option value="">Select a workspace</option>
+              {organizations.map((organization) => <option key={organization.id} value={organization.id}>{organization.name}</option>)}
+            </select>
+            {errors.organization_id && <p className="mt-1 text-xs text-red-600">{errors.organization_id}</p>}
+          </div>
+        )}
 
         <div>
           <label htmlFor="name" className="form-label">

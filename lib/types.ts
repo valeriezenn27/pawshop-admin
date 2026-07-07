@@ -14,6 +14,7 @@ export interface Product {
 }
 
 export interface ProductFormData {
+  organization_id?: string;
   name: string;
   category: string;
   price: number;
@@ -21,6 +22,11 @@ export interface ProductFormData {
   status: ProductStatus;
   image_url: string;
   description: string;
+}
+
+export interface OrganizationOption {
+  id: string;
+  name: string;
 }
 
 export interface DashboardStats {

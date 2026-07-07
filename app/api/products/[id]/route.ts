@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
-import { supabase } from "@/lib/supabase";
+import { createClient } from "@/lib/supabase/server";
 import type { ProductFormData } from "@/lib/types";
 
 interface RouteParams {
@@ -8,6 +8,7 @@ interface RouteParams {
 
 export async function GET(_request: NextRequest, { params }: RouteParams) {
   try {
+    const supabase = await createClient();
     const { id } = await params;
 
     const { data, error } = await supabase
@@ -29,6 +30,7 @@ export async function GET(_request: NextRequest, { params }: RouteParams) {
 
 export async function PUT(request: NextRequest, { params }: RouteParams) {
   try {
+    const supabase = await createClient();
     const { id } = await params;
     const body: ProductFormData = await request.json();
 
@@ -73,6 +75,7 @@ export async function PUT(request: NextRequest, { params }: RouteParams) {
 
 export async function DELETE(_request: NextRequest, { params }: RouteParams) {
   try {
+    const supabase = await createClient();
     const { id } = await params;
 
     const { error } = await supabase.from("products").delete().eq("id", id);

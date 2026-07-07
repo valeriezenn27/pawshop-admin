@@ -3,11 +3,12 @@ export const dynamic = "force-dynamic";
 import Link from "next/link";
 import { Package, CheckCircle, XCircle, AlertTriangle, ArrowRight, Plus } from "lucide-react";
 import StatsCard from "@/components/StatsCard";
-import { supabase } from "@/lib/supabase";
+import { createClient } from "@/lib/supabase/server";
 import { formatCurrency, formatDate } from "@/lib/utils";
 import type { Product } from "@/lib/types";
 
 async function getDashboardData() {
+  const supabase = await createClient();
   const { data: products, error } = await supabase
     .from("products")
     .select("*")

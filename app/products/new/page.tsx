@@ -1,8 +1,11 @@
 import Link from "next/link";
 import { ArrowLeft } from "lucide-react";
 import ProductForm from "@/components/ProductForm";
+import { createClient } from "@/lib/supabase/server";
 
-export default function NewProductPage() {
+export default async function NewProductPage() {
+  const supabase = await createClient();
+  const { data: organizations } = await supabase.from("organizations").select("id, name").order("name");
   return (
     <div data-testid="new-product-page">
       <div className="mb-6">
@@ -19,7 +22,7 @@ export default function NewProductPage() {
       </div>
 
       <div className="max-w-2xl">
-        <ProductForm />
+        <ProductForm organizations={organizations ?? []} />
       </div>
     </div>
   );

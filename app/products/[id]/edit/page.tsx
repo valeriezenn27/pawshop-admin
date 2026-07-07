@@ -4,13 +4,14 @@ import Link from "next/link";
 import { ArrowLeft } from "lucide-react";
 import { notFound } from "next/navigation";
 import ProductForm from "@/components/ProductForm";
-import { supabase } from "@/lib/supabase";
+import { createClient } from "@/lib/supabase/server";
 
 interface EditProductPageProps {
   params: Promise<{ id: string }>;
 }
 
 async function getProduct(id: string) {
+  const supabase = await createClient();
   const { data, error } = await supabase
     .from("products")
     .select("*")

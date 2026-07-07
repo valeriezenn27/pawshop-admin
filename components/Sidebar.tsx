@@ -2,9 +2,16 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { LayoutDashboard, Package, PlusCircle } from "lucide-react";
+import { LayoutDashboard, Package, PlusCircle, Upload, ShieldCheck } from "lucide-react";
+import AccountMenu from "./AccountMenu";
 
 const navItems = [
+  {
+    href: "/imports",
+    label: "Data imports",
+    icon: Upload,
+    exact: false,
+  },
   {
     href: "/",
     label: "Dashboard",
@@ -25,8 +32,10 @@ const navItems = [
   },
 ];
 
-export default function Sidebar() {
+export default function Sidebar({ account }: { account: { email: string; role: string } | null }) {
   const pathname = usePathname();
+
+  if (pathname === "/login") return null;
 
   function isActive(href: string, exact: boolean) {
     if (exact) return pathname === href;
@@ -43,8 +52,8 @@ export default function Sidebar() {
           🐾
         </div>
         <div>
-          <p className="font-semibold text-gray-900 leading-tight">PawShop</p>
-          <p className="text-xs text-gray-500">Admin Dashboard</p>
+          <p className="font-semibold text-gray-900 leading-tight">PawShop Ops</p>
+          <p className="text-xs text-gray-500">Commerce workspace</p>
         </div>
       </div>
 
@@ -70,7 +79,9 @@ export default function Sidebar() {
       </nav>
 
       <div className="px-4 py-4 border-t border-gray-200">
-        <p className="text-xs text-gray-400 text-center">PawShop Admin v1.0</p>
+        {account && <div className="mb-3"><AccountMenu email={account.email} role={account.role} /></div>}
+        <div className="mb-3 flex items-center gap-2 rounded-lg bg-emerald-50 px-3 py-2 text-xs font-medium text-emerald-700"><ShieldCheck size={14} /> Tenant data protected</div>
+        <p className="text-xs text-gray-400 text-center">PawShop Ops v2.0</p>
       </div>
     </aside>
   );

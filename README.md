@@ -1,198 +1,85 @@
-# PawShop Admin
+# PawShop Ops
 
-PawShop Admin is a full-stack pet supply store admin dashboard for managing products, inventory, and product status.
+A multi-tenant commerce operations app built with Next.js, TypeScript, Supabase/Postgres, and Playwright. The centerpiece is a safe CSV ingestion workflow: upload, map columns, validate in staging, detect duplicates and invalid rows, review the result, then promote only clean data.
 
-## Features
+This repository is intentionally more than a CRUD dashboard. It demonstrates the implementation concerns that matter in production: tenant-scoped Row Level Security, explicit role permissions, auditable staging data, database constraints, webhook idempotency, and end-to-end acceptance tests.
 
-- Product CRUD (Create, Read, Update, Delete)
-- Search products by name or category
-- Filter products by status (Active / Inactive)
-- Dashboard summary cards (Total, Active, Inactive, Low Stock)
-- Delete confirmation modal
-- Responsive UI (mobile-friendly)
-- Playwright E2E tests
+## What is implemented
 
-## Tech Stack
+- Four-step CSV import workflow at `/imports`
+- Automatic source-column matching with editable mappings
+- Required-field and numeric validation
+- Duplicate detection within an import batch
+- Staging review with ready, duplicate, and error states
+- Product CRUD, search, filters, inventory status, and dashboard metrics
+- Multi-tenant schema with owner, admin, operator, and viewer roles
+- RLS policies for products, import jobs, and staged rows
+- Webhook event ledger keyed by provider event ID for retry-safe processing
+- Playwright coverage for CRUD, responsive UI, and the full import path
+- pgTAP policy tests proving users cannot read or update another tenant
 
-- **Next.js 16** — App Router, Server Components, API Routes
-- **TypeScript** — Full type safety
-- **Tailwind CSS** — Utility-first styling
-- **Supabase** — PostgreSQL database
-- **Playwright** — End-to-end testing
-- **Vercel** — Deployment
+## Architecture
 
-## Pages
-
-| Route | Description |
-|-------|-------------|
-| `/` | Dashboard with stats and recent products |
-| `/products` | Full product list with search and filter |
-| `/products/new` | Add a new product |
-| `/products/[id]/edit` | Edit an existing product |
-
-## Product Fields
-
-| Field | Type | Description |
-|-------|------|-------------|
-| `id` | UUID | Auto-generated |
-| `name` | string | Product name |
-| `category` | string | Product category |
-| `price` | number | Price in USD |
-| `stock` | number | Quantity in stock |
-| `status` | active / inactive | Listing status |
-| `image_url` | string (optional) | Product image |
-| `description` | string (optional) | Product description |
-| `created_at` | timestamp | Auto-generated |
-| `updated_at` | timestamp | Auto-updated |
-
-## Getting Started
-
-### 1. Clone the repo
-
-```bash
-git clone https://github.com/yourusername/pawshop-admin.git
-cd pawshop-admin
+```text
+CSV upload
+   ↓
+column mapping
+   ↓
+import_jobs + import_rows (tenant-scoped staging)
+   ↓ validate / deduplicate / review
+   ↓
+products (production tables, single transaction)
 ```
 
-### 2. Install dependencies
+The browser demo performs validation locally so the workflow can be evaluated without credentials. The production database model lives in [`supabase/migrations/20260708000000_secure_imports.sql`](supabase/migrations/20260708000000_secure_imports.sql): every business row carries an `organization_id`, policies derive access from `auth.uid()`, and client access to the webhook ledger is denied by default.
+
+## Security verification
+
+RLS is tested as behavior, not assumed from policy text. [`supabase/tests/rls.sql`](supabase/tests/rls.sql) creates two users and organizations, authenticates as each user, and asserts that:
+
+1. A member sees only their organization’s records.
+2. Cross-tenant reads return no rows.
+3. Cross-tenant mutations do not affect protected records.
+4. Server-only webhook events remain inaccessible to clients.
+
+The service-role key must only be used in server-side routes and is never exposed through a `NEXT_PUBLIC_*` variable.
+
+## Webhook idempotency
+
+Payment providers retry events, so side effects must not run merely because a request arrived. `webhook_events.event_id` is a primary key. A handler verifies the signature, opens a transaction, inserts the event ID, and performs the business transition only if that insert succeeds. A duplicate delivery hits the unique constraint and returns success without creating a second order, email, inventory decrement, or payout.
+
+## Local setup
 
 ```bash
 npm install
-```
-
-### 3. Set up the database
-
-**Option A — Supabase Cloud (recommended for deployment)**
-
-1. Create a free project at [supabase.com](https://supabase.com)
-2. Go to **SQL Editor** and paste + run the contents of `supabase/schema.sql`
-3. Copy your credentials from **Project Settings → API**
-
-**Option B — Local Supabase via Docker (recommended for development)**
-
-> Requires [Docker Desktop](https://www.docker.com/products/docker-desktop/) running
-
-```bash
-npx supabase start
-```
-
-This auto-applies the schema and seed data. Credentials are printed in the terminal output.
-
-To stop when done:
-```bash
-npx supabase stop
-```
-
-Local Studio dashboard: [http://localhost:54323](http://localhost:54323)
-
-### 4. Configure environment variables
-
-```bash
 cp .env.local.example .env.local
-```
-
-Fill in `.env.local` with your credentials:
-
-```env
-# Cloud Supabase
-NEXT_PUBLIC_SUPABASE_URL=https://your-project.supabase.co
-NEXT_PUBLIC_SUPABASE_ANON_KEY=your_anon_key
-
-# OR Local Supabase (after running npx supabase start)
-# NEXT_PUBLIC_SUPABASE_URL=http://127.0.0.1:54321
-# NEXT_PUBLIC_SUPABASE_ANON_KEY=<key from supabase start output>
-```
-
-> `.env.local` is gitignored and will never be committed.
-
-### 5. Run locally
-
-```bash
+npx supabase start
 npm run dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000)
+Required browser-safe environment variables:
 
-## Automated Testing
+```env
+NEXT_PUBLIC_SUPABASE_URL=http://127.0.0.1:54321
+NEXT_PUBLIC_SUPABASE_ANON_KEY=<local anon key>
+```
 
-This project includes Playwright E2E tests covering:
+Open [http://localhost:3000/imports](http://localhost:3000/imports). A sample CSV is preloaded; you can also upload your own.
 
-- Dashboard smoke test (loads, stats visible)
-- Sidebar navigation
-- Product list loads
-- Add product flow
-- Edit product flow
-- Delete product flow (with confirmation modal)
-- Search/filter behavior
-- Form validation (empty fields, price > 0)
-- Mobile viewport (390px)
-- **Full CRUD flow**: Add → View in table → Edit price → Search → Delete
-
-### Run Tests
+## Verification
 
 ```bash
-npx playwright test
+npm run build
+npm test
 ```
 
-### Run Tests with UI
+The Playwright suite covers the import acceptance path (map → validate → identify duplicate/error → promote valid rows), product CRUD, search/filtering, validation, and mobile layouts.
 
-```bash
-npx playwright test --ui
-```
+## Stack
 
-### View Test Report
-
-```bash
-npx playwright show-report
-```
-
-### Install Playwright browsers (first time)
-
-```bash
-npx playwright install
-```
-
-## Deploy on Vercel
-
-1. Push this repo to GitHub
-2. Go to [vercel.com](https://vercel.com) → **Add New Project** → import the repo
-3. Under **Environment Variables**, add:
-   - `NEXT_PUBLIC_SUPABASE_URL`
-   - `NEXT_PUBLIC_SUPABASE_ANON_KEY`
-4. Click **Deploy**
-
-> Use your **cloud** Supabase credentials for Vercel — not the local ones.
-
-## Project Structure
-
-```
-pawshop-admin/
-├── app/
-│   ├── layout.tsx          # Root layout with sidebar
-│   ├── page.tsx            # Dashboard page
-│   ├── globals.css         # Global styles
-│   ├── products/
-│   │   ├── page.tsx        # Product list
-│   │   ├── new/page.tsx    # Add product
-│   │   └── [id]/edit/      # Edit product
-│   └── api/
-│       ├── products/       # CRUD API routes
-│       └── stats/          # Dashboard stats
-├── components/
-│   ├── Sidebar.tsx
-│   ├── StatsCard.tsx
-│   ├── ProductTable.tsx
-│   ├── ProductForm.tsx
-│   ├── SearchFilter.tsx
-│   └── DeleteModal.tsx
-├── lib/
-│   ├── supabase.ts         # Supabase client
-│   ├── types.ts            # TypeScript types
-│   └── utils.ts            # Helper functions
-├── tests/
-│   └── e2e/
-│       └── pawshop.spec.ts # Playwright tests
-├── supabase/
-│   └── schema.sql          # Database schema + seed data
-└── playwright.config.ts
-```
+- Next.js 16 App Router and React 19
+- TypeScript
+- Supabase/PostgreSQL with Row Level Security
+- Tailwind CSS
+- Playwright and pgTAP
+- Vercel-ready deployment

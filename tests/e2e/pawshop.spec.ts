@@ -24,7 +24,7 @@ async function addProduct(page: Page, product: typeof TEST_PRODUCT) {
 test.describe("Dashboard", () => {
   test("dashboard page loads with stats", async ({ page }) => {
     await page.goto("/");
-    await expect(page).toHaveTitle(/PawShop Admin/);
+    await expect(page).toHaveTitle(/PawShop Ops/);
     await expect(page.getByTestId("dashboard-page")).toBeVisible();
     await expect(page.getByTestId("stats-grid")).toBeVisible();
     const statsCards = page.getByTestId("stats-card");
@@ -41,6 +41,22 @@ test.describe("Dashboard", () => {
   test("recent products section is visible", async ({ page }) => {
     await page.goto("/");
     await expect(page.getByTestId("recent-products")).toBeVisible();
+  });
+});
+
+test.describe("CSV import staging", () => {
+  test("maps, validates, and promotes only valid rows", async ({ page }) => {
+    await page.goto("/imports");
+    await expect(page.getByTestId("import-workspace")).toBeVisible();
+    await page.getByTestId("import-next").click();
+    await expect(page.getByText("Map source columns")).toBeVisible();
+    await page.getByTestId("import-next").click();
+    await expect(page.getByText("Staging review")).toBeVisible();
+    await expect(page.getByText("Duplicate in this file — skipped")).toBeVisible();
+    await expect(page.getByText("Price must be greater than zero")).toBeVisible();
+    await page.getByTestId("promote-import").click();
+    await expect(page.getByTestId("import-complete")).toBeVisible();
+    await expect(page.getByText("3 products moved from staging to production.")).toBeVisible();
   });
 });
 
