@@ -38,7 +38,13 @@ const navItems = [
   },
 ];
 
-export default function Sidebar({ account }: { account: { email: string; role: string } | null }) {
+interface SidebarProps {
+  account: { email: string; role: string } | null;
+  mobile?: boolean;
+  onNavigate?: () => void;
+}
+
+export default function Sidebar({ account, mobile = false, onNavigate }: SidebarProps) {
   const pathname = usePathname();
   const visibleNavItems = account?.role === "platform_admin"
     ? [...navItems, { href: "/tenants", label: "Tenants", icon: Building2, exact: false }]
@@ -51,8 +57,9 @@ export default function Sidebar({ account }: { account: { email: string; role: s
 
   return (
     <aside
-      className="hidden md:flex md:flex-col w-64 bg-surface border-r border-stone-200 shrink-0 shadow-[2px_0_8px_rgba(0,0,0,0.03)]"
-      data-testid="sidebar"
+      id={mobile ? "mobile-navigation" : undefined}
+      className={`${mobile ? "flex h-full flex-col" : "hidden md:flex md:flex-col"} w-64 bg-surface border-r border-stone-200 shrink-0 shadow-[2px_0_8px_rgba(0,0,0,0.03)]`}
+      data-testid={mobile ? "mobile-sidebar" : "sidebar"}
     >
       <div data-sidebar-header className="flex items-center gap-3 bg-gradient-to-b from-inverse-from to-inverse-to px-6 py-5 shadow-md">
         <div className="flex h-9 w-9 items-center justify-center rounded-md bg-gradient-to-b from-brand-500 to-brand-600 font-display text-lg italic text-white shadow-sm shadow-brand-900/40 ring-1 ring-inset ring-white/15">
@@ -71,6 +78,7 @@ export default function Sidebar({ account }: { account: { email: string; role: s
             <Link
               key={href}
               href={href}
+              onClick={onNavigate}
               data-testid={`nav-${label.toLowerCase().replace(/\s+/g, "-")}`}
               data-nav-active={active || undefined}
               className={`flex items-center gap-3 rounded-md px-4 py-2.5 text-sm font-medium transition-all ${
