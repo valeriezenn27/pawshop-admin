@@ -26,12 +26,14 @@ as $$
   );
 $$;
 
+drop policy if exists "org admins add members" on public.organization_members;
 create policy "org admins add members" on public.organization_members
   for insert to authenticated
   with check (public.is_org_admin(organization_id));
 
 -- user_id <> auth.uid() blocks self-promotion (an admin cannot make
 -- themselves owner). Platform admins bypass this via their own policy.
+drop policy if exists "org admins change member roles" on public.organization_members;
 create policy "org admins change member roles" on public.organization_members
   for update to authenticated
   using (public.is_org_admin(organization_id) and user_id <> auth.uid())

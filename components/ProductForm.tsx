@@ -1,9 +1,11 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
+import { Camera, ImagePlus, Loader2, Trash2 } from "lucide-react";
 import type { OrganizationOption, Product, ProductFormData } from "@/lib/types";
+import { createClient } from "@/lib/supabase/client";
 
 const CATEGORIES = [
   "Shampoo & Grooming",
@@ -38,6 +40,7 @@ export default function ProductForm({ initialData, isEdit = false, organizations
     initialData
       ? {
           name: initialData.name,
+          organization_id: initialData.organization_id,
           category: initialData.category,
           price: initialData.price,
           stock: initialData.stock,
@@ -50,6 +53,18 @@ export default function ProductForm({ initialData, isEdit = false, organizations
   const [errors, setErrors] = useState<Partial<Record<keyof ProductFormData, string>>>({});
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [serverError, setServerError] = useState("");
+  const [imageFile, setImageFile] = useState<File | null>(null);
+  const [imagePreview, setImagePreview] = useState(initialData?.image_url ?? "");
+  const [imageError, setImageError] = useState("");
+  const uploadInputRef = useRef<HTMLInputElement>(null);
+  const cameraInputRef = useRef<HTMLInputElement>(null);
+
+  useEffect(() => {
+    if (!imageFile) return;
+    const objectUrl = URL.createObjectURL(imageFile);
+    setImagePreview(objectUrl);
+    return () => URL.revokeObjectURL(objectUrl);
+  }, [imageFile]);
 
   function validate(): boolean {
     const newErrors: Partial<Record<keyof ProductFormData, string>> = {};
@@ -88,13 +103,30 @@ export default function ProductForm({ initialData, isEdit = false, organizations
     setServerError("");
 
     try {
+      let nextFormData = formData;
+      if (imageFile) {
+        const organizationId = formData.organization_id ?? initialData?.organization_id;
+        if (!organizationId) throw new Error("Choose a workspace before uploading an image");
+
+        const extension = imageFile.name.split(".").pop()?.toLowerCase() || "jpg";
+        const path = `${organizationId}/${crypto.randomUUID()}.${extension}`;
+        const supabase = createClient();
+        const { error: uploadError } = await supabase.storage
+          .from("product-images")
+          .upload(path, imageFile, { contentType: imageFile.type, upsert: false });
+        if (uploadError) throw new Error(`Image upload failed: ${uploadError.message}`);
+
+        const { data: publicUrl } = supabase.storage.from("product-images").getPublicUrl(path);
+        nextFormData = { ...formData, image_url: publicUrl.publicUrl };
+      }
+
       const url = isEdit ? `/api/products/${initialData!.id}` : "/api/products";
       const method = isEdit ? "PUT" : "POST";
 
       const response = await fetch(url, {
         method,
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(formData),
+        body: JSON.stringify(nextFormData),
       });
 
       if (!response.ok) {
@@ -109,6 +141,29 @@ export default function ProductForm({ initialData, isEdit = false, organizations
     } finally {
       setIsSubmitting(false);
     }
+  }
+
+  function selectImage(event: React.ChangeEvent<HTMLInputElement>) {
+    const file = event.target.files?.[0];
+    event.target.value = "";
+    if (!file) return;
+    setImageError("");
+    if (!file.type.startsWith("image/")) {
+      setImageError("Choose an image file");
+      return;
+    }
+    if (file.size > 5 * 1024 * 1024) {
+      setImageError("Image must be 5 MB or smaller");
+      return;
+    }
+    setImageFile(file);
+  }
+
+  function removeImage() {
+    setImageFile(null);
+    setImagePreview("");
+    setFormData((previous) => ({ ...previous, image_url: "" }));
+    setImageError("");
   }
 
   function handleChange(
@@ -272,19 +327,33 @@ export default function ProductForm({ initialData, isEdit = false, organizations
         <p className="text-[11px] font-medium uppercase tracking-[0.1em] text-stone-400">Additional info</p>
 
         <div>
-          <label htmlFor="image_url" className="form-label">
-            Image URL
-          </label>
-          <input
-            id="image_url"
-            name="image_url"
-            type="url"
-            value={formData.image_url}
-            onChange={handleChange}
-            className="form-input"
-            placeholder="https://example.com/image.jpg"
-            data-testid="input-image-url"
-          />
+          <label className="form-label">Product image</label>
+          <div className="mt-1 flex flex-col gap-4 sm:flex-row sm:items-center">
+            <div className="flex h-36 w-full items-center justify-center overflow-hidden rounded-lg border border-dashed border-stone-300 bg-stone-50 sm:h-32 sm:w-32 sm:shrink-0">
+              {imagePreview ? (
+                <img src={imagePreview} alt="Product preview" className="h-full w-full object-cover" />
+              ) : (
+                <ImagePlus size={30} className="text-stone-300" />
+              )}
+            </div>
+            <div className="flex flex-1 flex-wrap gap-2">
+              <input ref={uploadInputRef} type="file" accept="image/jpeg,image/png,image/webp,image/gif" onChange={selectImage} className="hidden" data-testid="input-product-image" />
+              <input ref={cameraInputRef} type="file" accept="image/*" capture="environment" onChange={selectImage} className="hidden" data-testid="input-product-camera" />
+              <button type="button" className="btn-secondary" onClick={() => uploadInputRef.current?.click()}>
+                <ImagePlus size={16} /> Upload image
+              </button>
+              <button type="button" className="btn-secondary" onClick={() => cameraInputRef.current?.click()}>
+                <Camera size={16} /> Take photo
+              </button>
+              {imagePreview && (
+                <button type="button" className="btn-secondary text-rose-600" onClick={removeImage}>
+                  <Trash2 size={16} /> Remove
+                </button>
+              )}
+              <p className="w-full text-xs text-stone-400">JPG, PNG, WebP or GIF · maximum 5 MB</p>
+              {imageError && <p className="w-full text-xs text-rose-600" role="alert">{imageError}</p>}
+            </div>
+          </div>
         </div>
 
         <div>
@@ -316,9 +385,7 @@ export default function ProductForm({ initialData, isEdit = false, organizations
           data-testid="btn-submit"
         >
           {isSubmitting
-            ? isEdit
-              ? "Saving..."
-              : "Adding..."
+            ? <><Loader2 size={16} className="animate-spin" /> {imageFile ? "Uploading..." : isEdit ? "Saving..." : "Adding..."}</>
             : isEdit
             ? "Save Changes"
             : "Add Product"}

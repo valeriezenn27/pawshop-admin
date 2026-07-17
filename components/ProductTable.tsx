@@ -56,7 +56,76 @@ export default function ProductTable({ products }: ProductTableProps) {
 
   return (
     <>
-      <div className="overflow-x-auto bg-surface shadow-sm" data-testid="product-table">
+      <div className="space-y-3 md:hidden" data-testid="product-cards">
+        {products.map((product) => (
+          <article key={product.id} className="overflow-hidden rounded-lg border border-stone-200 bg-surface shadow-sm" data-testid="product-card">
+            <div className="flex gap-3 p-4">
+              <div className="flex h-20 w-20 shrink-0 items-center justify-center overflow-hidden rounded-lg bg-stone-100">
+                {product.image_url ? (
+                  <Image
+                    src={product.image_url}
+                    alt={product.name}
+                    width={80}
+                    height={80}
+                    className="h-full w-full object-cover"
+                    onError={(event) => {
+                      (event.target as HTMLImageElement).style.display = "none";
+                    }}
+                  />
+                ) : (
+                  <Package size={24} className="text-stone-400" />
+                )}
+              </div>
+              <div className="min-w-0 flex-1">
+                <div className="flex items-start justify-between gap-2">
+                  <div className="min-w-0">
+                    <h2 className="truncate font-medium text-stone-900" data-testid="product-name">{product.name}</h2>
+                    <p className="mt-0.5 truncate text-xs text-stone-500" data-testid="product-category">{product.category}</p>
+                  </div>
+                  <span className={`${product.status === "active" ? "badge-active" : "badge-inactive"} shrink-0`} data-testid="product-status">
+                    {product.status === "active" ? "Active" : "Inactive"}
+                  </span>
+                </div>
+                {product.description && <p className="mt-2 line-clamp-2 text-xs text-stone-400">{product.description}</p>}
+              </div>
+            </div>
+
+            <div className="grid grid-cols-3 border-y border-stone-100 bg-stone-50/60">
+              <div className="px-4 py-3">
+                <p className="text-[10px] uppercase tracking-wide text-stone-400">Price</p>
+                <p className="mt-0.5 text-sm font-semibold text-stone-900" data-testid="product-price">{formatCurrency(product.price)}</p>
+              </div>
+              <div className="border-x border-stone-100 px-4 py-3">
+                <p className="text-[10px] uppercase tracking-wide text-stone-400">Stock</p>
+                <p className={`mt-0.5 text-sm font-semibold ${product.stock < 10 ? "text-amber-600" : "text-stone-900"}`} data-testid="product-stock">{product.stock}</p>
+              </div>
+              <div className="px-4 py-3">
+                <p className="text-[10px] uppercase tracking-wide text-stone-400">Updated</p>
+                <p className="mt-0.5 truncate text-xs text-stone-600">{formatDate(product.updated_at)}</p>
+              </div>
+            </div>
+
+            <div className="grid grid-cols-2 gap-2 p-3">
+              <Link
+                href={`/products/${product.id}/edit`}
+                className="inline-flex items-center justify-center gap-1.5 rounded-md bg-gradient-to-b from-brand-500 to-brand-600 px-3 py-2 text-sm font-medium text-white shadow-sm"
+                data-testid="btn-edit"
+              >
+                <Pencil size={14} /> Edit
+              </Link>
+              <button
+                onClick={() => setDeleteTarget(product)}
+                className="inline-flex items-center justify-center gap-1.5 rounded-md border border-rose-200 bg-surface px-3 py-2 text-sm font-medium text-rose-600"
+                data-testid="btn-delete"
+              >
+                <Trash2 size={14} /> Delete
+              </button>
+            </div>
+          </article>
+        ))}
+      </div>
+
+      <div className="hidden overflow-x-auto bg-surface shadow-sm md:block" data-testid="product-table">
         <table className="w-full text-sm">
           <thead>
             <tr data-table-head className="bg-gradient-to-b from-inverse-from to-inverse-to shadow-sm">

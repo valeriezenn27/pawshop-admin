@@ -2,6 +2,7 @@ export type ProductStatus = "active" | "inactive";
 
 export interface Product {
   id: string;
+  organization_id: string;
   name: string;
   category: string;
   price: number;
