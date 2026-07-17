@@ -1,0 +1,41 @@
+{
+  "permissions": {
+    "allow": [
+      "Read",
+      "Grep",
+      "Glob",
+      "Bash(git status)",
+      "Bash(git diff)",
+      "Bash(git diff *)",
+      "Bash(git log)",
+      "Bash(git log *)",
+      "Bash(npm run dev)",
+      "Bash(npm run build)",
+      "Bash(npm run lint)",
+      "Bash(npm test)",
+      "Bash(npm run test:ui)",
+      "Bash(npm run test:report)",
+      "Bash(npx supabase start)",
+      "Bash(npx supabase stop)",
+      "Bash(npx supabase status)",
+      "Bash(npx supabase db reset)",
+      "Bash(psql \"$DATABASE_URL\" -f supabase/tests/rls.sql)"
+    ],
+    "ask": [
+      "Edit(supabase/migrations/**)",
+      "Write(supabase/migrations/**)",
+      "Bash(npx supabase migration new *)",
+      "Bash(npx supabase db push)",
+      "Bash(npx supabase db push *)",
+      "Bash(npx supabase link *)",
+      "Bash(vercel *)",
+      "Bash(git push)",
+      "Bash(git push *)",
+      "Bash(git commit)",
+      "Bash(git commit *)",
+      "Bash(rm *)",
+      "Edit(.env*)",
+      "Write(.env*)"
+    ]
+  }
+}
