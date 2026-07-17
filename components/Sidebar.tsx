@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { LayoutDashboard, Package, PlusCircle, Upload, ShieldCheck } from "lucide-react";
+import { LayoutDashboard, Package, PlusCircle, Upload, Users, ShieldCheck } from "lucide-react";
 import AccountMenu from "./AccountMenu";
 
 const navItems = [
@@ -29,6 +29,12 @@ const navItems = [
     label: "Add Product",
     icon: PlusCircle,
     exact: true,
+  },
+  {
+    href: "/users",
+    label: "Users",
+    icon: Users,
+    exact: false,
   },
 ];
 

@@ -23,8 +23,11 @@ as $$
 $$;
 
 -- Wanda. Platform-admin assignment is intentionally migration/service-role only.
+-- Guarded so fresh local databases (where this hosted auth user does not
+-- exist) can still run `supabase db reset`; on the hosted project the row
+-- inserts as before.
 insert into public.platform_admins (user_id)
-values ('a700d287-4f91-48bb-9a88-e445e9dff81d')
+select id from auth.users where id = 'a700d287-4f91-48bb-9a88-e445e9dff81d'
 on conflict (user_id) do nothing;
 
 create policy "platform admins read admin assignments"

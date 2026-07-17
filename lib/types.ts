@@ -29,6 +29,24 @@ export interface OrganizationOption {
   name: string;
 }
 
+// Mirrors the check constraint on organization_members.role.
+export type OrganizationRole = "owner" | "admin" | "operator" | "viewer";
+
+export interface OrgMember {
+  organization_id: string;
+  organization_name: string;
+  user_id: string;
+  email: string | null;
+  role: OrganizationRole;
+}
+
+export interface CreateUserPayload {
+  email: string;
+  password: string;
+  organization_id: string;
+  role: OrganizationRole;
+}
+
 export interface DashboardStats {
   totalProducts: number;
   activeProducts: number;
