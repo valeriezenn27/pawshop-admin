@@ -128,30 +128,31 @@ export default function ProductForm({ initialData, isEdit = false, organizations
     <form onSubmit={handleSubmit} data-testid="product-form" noValidate className="space-y-6">
       {serverError && (
         <div
-          className="rounded-lg border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700"
+          className="border-l-2 border-rose-400 dark:border-rose-600 bg-rose-50/60 dark:bg-rose-950/40 px-4 py-3 text-sm text-rose-700 dark:text-rose-300"
           data-testid="form-error"
         >
           {serverError}
         </div>
       )}
 
-      <div className="card p-6 space-y-5">
-        <h2 className="text-base font-semibold text-gray-900">Product Details</h2>
+      <div className="border-t-2 border-stone-900 bg-surface shadow-sm">
+      <div className="space-y-5 p-6">
+        <p className="text-[11px] font-medium uppercase tracking-[0.1em] text-stone-400">Product details</p>
 
         {!isEdit && organizations.length > 0 && (
           <div>
-            <label htmlFor="organization_id" className="form-label">Workspace <span className="text-red-500">*</span></label>
+            <label htmlFor="organization_id" className="form-label">Workspace <span className="text-rose-500">*</span></label>
             <select id="organization_id" name="organization_id" className="form-input" required value={formData.organization_id ?? ""} onChange={handleChange} data-testid="input-organization">
               <option value="">Select a workspace</option>
               {organizations.map((organization) => <option key={organization.id} value={organization.id}>{organization.name}</option>)}
             </select>
-            {errors.organization_id && <p className="mt-1 text-xs text-red-600">{errors.organization_id}</p>}
+            {errors.organization_id && <p className="mt-1 text-xs text-rose-600 dark:text-rose-400">{errors.organization_id}</p>}
           </div>
         )}
 
         <div>
           <label htmlFor="name" className="form-label">
-            Product Name <span className="text-red-500">*</span>
+            Product Name <span className="text-rose-500">*</span>
           </label>
           <input
             id="name"
@@ -159,12 +160,12 @@ export default function ProductForm({ initialData, isEdit = false, organizations
             type="text"
             value={formData.name}
             onChange={handleChange}
-            className={`form-input ${errors.name ? "border-red-400 focus:border-red-400 focus:ring-red-400" : ""}`}
+            className={`form-input ${errors.name ? "border-rose-400 dark:border-rose-600 focus:border-rose-400 focus:ring-rose-400" : ""}`}
             placeholder="e.g. Golden Retriever Shampoo"
             data-testid="input-name"
           />
           {errors.name && (
-            <p className="mt-1 text-xs text-red-600" data-testid="error-name">
+            <p className="mt-1 text-xs text-rose-600 dark:text-rose-400" data-testid="error-name">
               {errors.name}
             </p>
           )}
@@ -172,14 +173,14 @@ export default function ProductForm({ initialData, isEdit = false, organizations
 
         <div>
           <label htmlFor="category" className="form-label">
-            Category <span className="text-red-500">*</span>
+            Category <span className="text-rose-500">*</span>
           </label>
           <select
             id="category"
             name="category"
             value={formData.category}
             onChange={handleChange}
-            className={`form-input ${errors.category ? "border-red-400 focus:border-red-400 focus:ring-red-400" : ""}`}
+            className={`form-input ${errors.category ? "border-rose-400 dark:border-rose-600 focus:border-rose-400 focus:ring-rose-400" : ""}`}
             data-testid="input-category"
           >
             <option value="">Select a category</option>
@@ -190,7 +191,7 @@ export default function ProductForm({ initialData, isEdit = false, organizations
             ))}
           </select>
           {errors.category && (
-            <p className="mt-1 text-xs text-red-600" data-testid="error-category">
+            <p className="mt-1 text-xs text-rose-600 dark:text-rose-400" data-testid="error-category">
               {errors.category}
             </p>
           )}
@@ -199,10 +200,10 @@ export default function ProductForm({ initialData, isEdit = false, organizations
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
           <div>
             <label htmlFor="price" className="form-label">
-              Price (USD) <span className="text-red-500">*</span>
+              Price (USD) <span className="text-rose-500">*</span>
             </label>
             <div className="relative">
-              <span className="absolute inset-y-0 left-0 flex items-center pl-3 text-gray-400 text-sm">
+              <span className="absolute inset-y-0 left-0 flex items-center pl-3 text-stone-400 text-sm">
                 $
               </span>
               <input
@@ -213,13 +214,13 @@ export default function ProductForm({ initialData, isEdit = false, organizations
                 step="0.01"
                 value={formData.price}
                 onChange={handleChange}
-                className={`form-input pl-7 ${errors.price ? "border-red-400 focus:border-red-400 focus:ring-red-400" : ""}`}
+                className={`form-input pl-7 ${errors.price ? "border-rose-400 dark:border-rose-600 focus:border-rose-400 focus:ring-rose-400" : ""}`}
                 placeholder="0.00"
                 data-testid="input-price"
               />
             </div>
             {errors.price && (
-              <p className="mt-1 text-xs text-red-600" data-testid="error-price">
+              <p className="mt-1 text-xs text-rose-600 dark:text-rose-400" data-testid="error-price">
                 {errors.price}
               </p>
             )}
@@ -237,12 +238,12 @@ export default function ProductForm({ initialData, isEdit = false, organizations
               step="1"
               value={formData.stock}
               onChange={handleChange}
-              className={`form-input ${errors.stock ? "border-red-400 focus:border-red-400 focus:ring-red-400" : ""}`}
+              className={`form-input ${errors.stock ? "border-rose-400 dark:border-rose-600 focus:border-rose-400 focus:ring-rose-400" : ""}`}
               placeholder="0"
               data-testid="input-stock"
             />
             {errors.stock && (
-              <p className="mt-1 text-xs text-red-600" data-testid="error-stock">
+              <p className="mt-1 text-xs text-rose-600 dark:text-rose-400" data-testid="error-stock">
                 {errors.stock}
               </p>
             )}
@@ -267,8 +268,8 @@ export default function ProductForm({ initialData, isEdit = false, organizations
         </div>
       </div>
 
-      <div className="card p-6 space-y-5">
-        <h2 className="text-base font-semibold text-gray-900">Additional Info</h2>
+      <div className="space-y-5 border-t border-stone-200 p-6">
+        <p className="text-[11px] font-medium uppercase tracking-[0.1em] text-stone-400">Additional info</p>
 
         <div>
           <label htmlFor="image_url" className="form-label">
@@ -301,6 +302,7 @@ export default function ProductForm({ initialData, isEdit = false, organizations
             data-testid="input-description"
           />
         </div>
+      </div>
       </div>
 
       <div className="flex items-center justify-end gap-3">

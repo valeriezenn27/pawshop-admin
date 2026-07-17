@@ -30,7 +30,7 @@ export default function SearchFilter() {
       <div className="relative flex-1">
         <Search
           size={16}
-          className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 pointer-events-none"
+          className="absolute left-3 top-1/2 -translate-y-1/2 text-stone-400 pointer-events-none"
         />
         <input
           type="text"
@@ -44,7 +44,7 @@ export default function SearchFilter() {
       </div>
 
       <div className="relative flex items-center gap-2 shrink-0">
-        <SlidersHorizontal size={16} className="text-gray-400" />
+        <SlidersHorizontal size={16} className="text-stone-400" />
         <select
           value={status}
           onChange={(e) => updateParams("status", e.target.value)}

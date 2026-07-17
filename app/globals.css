@@ -3,41 +3,198 @@
 @tailwind utilities;
 
 @layer base {
+  :root,
+  [data-theme="default"] {
+    --stone-50: 250 250 249;
+    --stone-100: 245 245 244;
+    --stone-200: 231 229 228;
+    --stone-300: 214 211 209;
+    --stone-400: 168 162 158;
+    --stone-500: 120 113 108;
+    --stone-600: 87 83 78;
+    --stone-700: 68 64 60;
+    --stone-800: 41 37 36;
+    --stone-900: 28 25 23;
+    --stone-950: 12 10 9;
+    --surface: 255 255 255;
+    --accent: 120 58 34;
+    --inverse-from: 41 37 36;
+    --inverse-to: 28 25 23;
+    --brand-50: 251 243 238;
+    --brand-100: 245 225 211;
+    --brand-200: 233 192 163;
+    --brand-300: 218 155 114;
+    --brand-400: 200 122 78;
+    --brand-500: 177 94 54;
+    --brand-600: 147 72 42;
+    --brand-700: 120 58 34;
+    --brand-800: 95 46 27;
+    --brand-900: 74 36 21;
+  }
+
+  [data-theme="light"] {
+    --stone-50: 250 250 250;
+    --stone-100: 244 244 245;
+    --stone-200: 228 228 231;
+    --stone-300: 212 212 216;
+    --stone-400: 161 161 170;
+    --stone-500: 113 113 122;
+    --stone-600: 82 82 91;
+    --stone-700: 63 63 70;
+    --stone-800: 39 39 42;
+    --stone-900: 24 24 27;
+    --stone-950: 9 9 11;
+    --surface: 255 255 255;
+    --accent: 149 90 51;
+    --inverse-from: 113 113 122;
+    --inverse-to: 82 82 91;
+    --brand-50: 254 250 248;
+    --brand-100: 250 238 229;
+    --brand-200: 242 214 190;
+    --brand-300: 232 187 148;
+    --brand-400: 220 160 112;
+    --brand-500: 204 133 82;
+    --brand-600: 178 111 64;
+    --brand-700: 149 90 51;
+    --brand-800: 118 72 39;
+    --brand-900: 92 56 30;
+  }
+
+  [data-theme="dark"] {
+    --stone-50: 12 10 9;
+    --stone-100: 28 25 23;
+    --stone-200: 41 37 36;
+    --stone-300: 68 64 60;
+    --stone-400: 87 83 78;
+    --stone-500: 120 113 108;
+    --stone-600: 168 162 158;
+    --stone-700: 214 211 209;
+    --stone-800: 231 229 228;
+    --stone-900: 245 245 244;
+    --stone-950: 250 250 249;
+    --surface: 28 25 23;
+    --accent: 218 155 114;
+    --inverse-from: 68 64 60;
+    --inverse-to: 41 37 36;
+    --brand-50: 251 243 238;
+    --brand-100: 245 225 211;
+    --brand-200: 233 192 163;
+    --brand-300: 218 155 114;
+    --brand-400: 200 122 78;
+    --brand-500: 177 94 54;
+    --brand-600: 147 72 42;
+    --brand-700: 120 58 34;
+    --brand-800: 95 46 27;
+    --brand-900: 74 36 21;
+  }
+
   body {
-    @apply bg-gray-50 text-gray-900 antialiased;
+    @apply bg-stone-50 text-stone-900 antialiased;
   }
 }
 
 @layer components {
   .btn-primary {
-    @apply inline-flex items-center gap-2 rounded-lg bg-indigo-600 px-4 py-2 text-sm font-medium text-white shadow-sm transition-colors hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed;
+    @apply inline-flex items-center gap-2 rounded-md bg-gradient-to-b from-brand-500 to-brand-600 px-4 py-2 text-sm font-medium text-white shadow-sm shadow-brand-900/30 ring-1 ring-inset ring-white/15 transition-all hover:from-brand-600 hover:to-brand-700 hover:shadow-md hover:shadow-brand-900/40 focus:outline-none focus:ring-2 focus:ring-brand-600 focus:ring-offset-2 focus:ring-offset-stone-50 active:shadow-inner active:shadow-brand-900/40 disabled:opacity-50 disabled:cursor-not-allowed;
   }
 
   .btn-secondary {
-    @apply inline-flex items-center gap-2 rounded-lg border border-gray-300 bg-white px-4 py-2 text-sm font-medium text-gray-700 shadow-sm transition-colors hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2;
+    @apply inline-flex items-center gap-2 rounded-md border border-stone-300 bg-surface px-4 py-2 text-sm font-medium text-stone-700 shadow-sm transition-all hover:border-stone-400 hover:bg-stone-50 hover:shadow focus:outline-none focus:ring-2 focus:ring-brand-600 focus:ring-offset-2 focus:ring-offset-stone-50;
   }
 
   .btn-danger {
-    @apply inline-flex items-center gap-2 rounded-lg bg-red-600 px-4 py-2 text-sm font-medium text-white shadow-sm transition-colors hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-red-500 focus:ring-offset-2;
+    @apply inline-flex items-center gap-2 rounded-md bg-gradient-to-b from-rose-500 to-rose-600 px-4 py-2 text-sm font-medium text-white shadow-sm shadow-rose-900/30 ring-1 ring-inset ring-white/15 transition-all hover:from-rose-600 hover:to-rose-700 hover:shadow-md hover:shadow-rose-900/40 focus:outline-none focus:ring-2 focus:ring-rose-500 focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed;
   }
 
   .form-input {
-    @apply block w-full rounded-lg border border-gray-300 bg-white px-3 py-2 text-sm shadow-sm transition-colors placeholder:text-gray-400 focus:border-indigo-500 focus:outline-none focus:ring-1 focus:ring-indigo-500;
+    @apply block w-full rounded-md border border-stone-300 bg-surface px-3 py-2 text-sm shadow-inner shadow-stone-900/[0.03] transition-colors placeholder:text-stone-400 focus:border-brand-600 focus:outline-none focus:ring-1 focus:ring-brand-600;
   }
 
   .form-label {
-    @apply block text-sm font-medium text-gray-700 mb-1;
-  }
-
-  .card {
-    @apply rounded-xl border border-gray-200 bg-white shadow-sm;
+    @apply block text-sm font-medium text-stone-700 mb-1;
   }
 
   .badge-active {
-    @apply inline-flex items-center rounded-full bg-green-100 px-2.5 py-0.5 text-xs font-medium text-green-700;
+    @apply inline-flex items-center rounded-full bg-gradient-to-b from-emerald-500 to-emerald-600 px-2.5 py-0.5 text-xs font-medium text-white shadow-sm shadow-emerald-900/20 ring-1 ring-inset ring-white/15;
   }
 
   .badge-inactive {
-    @apply inline-flex items-center rounded-full bg-gray-100 px-2.5 py-0.5 text-xs font-medium text-gray-600;
+    @apply inline-flex items-center rounded-full bg-gradient-to-b from-inverse-from to-inverse-to px-2.5 py-0.5 text-xs font-medium text-white shadow-sm shadow-black/20 ring-1 ring-inset ring-white/15;
   }
+}
+
+/*
+  Light theme is meant to read as genuinely quiet/minimal, not just a paler version of
+  Default's bold color-block treatment. These overrides defeat the solid-fill gradient
+  blocks (stat tiles, sidebar header, active nav, table header bands, status chips) with
+  neutral surfaces + a small tone-colored accent, scoped only to [data-theme="light"] so
+  Default and Dark are untouched. Selector specificity (two+ attribute selectors) is used
+  instead of !important to win over the Tailwind utility classes already on the elements.
+*/
+[data-theme="light"] [data-stat-tile] {
+  background-image: none;
+  background-color: rgb(var(--surface));
+  box-shadow: none;
+  border: 1px solid rgb(var(--stone-200));
+}
+[data-theme="light"] [data-stat-tile] [data-tile-icon] {
+  color: rgb(var(--stone-400));
+}
+[data-theme="light"] [data-stat-tile] [data-tile-value] {
+  color: rgb(var(--stone-900));
+  filter: none;
+}
+[data-theme="light"] [data-stat-tile] [data-tile-meta] {
+  color: rgb(var(--stone-400));
+}
+[data-theme="light"] [data-stat-tile][data-tone="brand"] [data-tile-icon] { color: rgb(var(--accent)); }
+[data-theme="light"] [data-stat-tile][data-tone="emerald"] [data-tile-icon] { color: rgb(5 150 105); }
+[data-theme="light"] [data-stat-tile][data-tone="amber"] [data-tile-icon] { color: rgb(217 119 6); }
+[data-theme="light"] [data-stat-tile][data-tone="rose"] [data-tile-icon] { color: rgb(225 29 72); }
+[data-theme="light"] [data-stat-tile][data-tone="stone"] [data-tile-icon] { color: rgb(var(--stone-500)); }
+
+[data-theme="light"] [data-sidebar-header] {
+  background-image: none;
+  background-color: rgb(var(--surface));
+  border-bottom: 1px solid rgb(var(--stone-200));
+  box-shadow: none;
+}
+[data-theme="light"] [data-brand-text] { color: rgb(var(--stone-900)); }
+[data-theme="light"] [data-brand-subtext] { color: rgb(var(--stone-400)); }
+
+[data-theme="light"] [data-nav-active] {
+  background-image: none;
+  background-color: rgb(var(--brand-50));
+  color: rgb(var(--accent));
+  box-shadow: none;
+}
+
+[data-theme="light"] [data-table-head] {
+  background-image: none;
+  background-color: rgb(var(--stone-100));
+  box-shadow: none;
+}
+[data-theme="light"] [data-table-head] th {
+  color: rgb(var(--stone-600));
+}
+
+[data-theme="light"] [data-chip] {
+  background-image: none;
+  box-shadow: none;
+  border: 1px solid transparent;
+}
+[data-theme="light"] [data-chip="emerald"] {
+  background-color: rgb(236 253 245);
+  color: rgb(4 120 87);
+  border-color: rgb(167 243 208);
+}
+[data-theme="light"] [data-chip="brand"] {
+  background-color: rgb(var(--brand-50));
+  color: rgb(var(--accent));
+  border-color: rgb(var(--brand-200));
+}
+[data-theme="light"] [data-chip="stone"] {
+  background-color: rgb(var(--stone-100));
+  color: rgb(var(--stone-600));
+  border-color: rgb(var(--stone-200));
 }

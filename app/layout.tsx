@@ -1,7 +1,27 @@
 import type { Metadata } from "next";
+import { Fraunces, Inter } from "next/font/google";
 import "./globals.css";
-import Sidebar from "@/components/Sidebar";
+import AppShell from "@/components/AppShell";
 import { createClient } from "@/lib/supabase/server";
+import { THEME_STORAGE_KEY } from "@/lib/theme";
+
+const themeBootstrapScript = `
+(function () {
+  try {
+    var theme = localStorage.getItem("${THEME_STORAGE_KEY}") || "default";
+    document.documentElement.setAttribute("data-theme", theme);
+    if (theme === "dark") document.documentElement.classList.add("dark");
+  } catch (e) {}
+})();
+`;
+
+const inter = Inter({ subsets: ["latin"], variable: "--font-inter", display: "swap" });
+const fraunces = Fraunces({
+  subsets: ["latin"],
+  variable: "--font-fraunces",
+  display: "swap",
+  axes: ["opsz"],
+});
 
 export const metadata: Metadata = {
   title: "PawShop Ops",
@@ -27,14 +47,12 @@ export default async function RootLayout({
   }
 
   return (
-    <html lang="en">
+    <html lang="en" className={`${inter.variable} ${fraunces.variable}`} suppressHydrationWarning>
+      <head>
+        <script dangerouslySetInnerHTML={{ __html: themeBootstrapScript }} />
+      </head>
       <body className="font-sans">
-        <div className="flex h-screen overflow-hidden bg-gray-50">
-          <Sidebar account={account} />
-          <main className="flex-1 overflow-y-auto">
-            <div className="p-6 lg:p-8">{children}</div>
-          </main>
-        </div>
+        <AppShell account={account}>{children}</AppShell>
       </body>
     </html>
   );

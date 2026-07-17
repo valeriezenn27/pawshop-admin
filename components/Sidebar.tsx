@@ -35,8 +35,6 @@ const navItems = [
 export default function Sidebar({ account }: { account: { email: string; role: string } | null }) {
   const pathname = usePathname();
 
-  if (pathname === "/login") return null;
-
   function isActive(href: string, exact: boolean) {
     if (exact) return pathname === href;
     return pathname.startsWith(href);
@@ -44,20 +42,20 @@ export default function Sidebar({ account }: { account: { email: string; role: s
 
   return (
     <aside
-      className="hidden md:flex md:flex-col w-64 bg-white border-r border-gray-200 shrink-0"
+      className="hidden md:flex md:flex-col w-64 bg-surface border-r border-stone-200 shrink-0 shadow-[2px_0_8px_rgba(0,0,0,0.03)]"
       data-testid="sidebar"
     >
-      <div className="flex items-center gap-3 px-6 py-5 border-b border-gray-200">
-        <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-indigo-600 text-white font-bold text-sm">
-          🐾
+      <div data-sidebar-header className="flex items-center gap-3 bg-gradient-to-b from-inverse-from to-inverse-to px-6 py-5 shadow-md">
+        <div className="flex h-9 w-9 items-center justify-center rounded-md bg-gradient-to-b from-brand-500 to-brand-600 font-display text-lg italic text-white shadow-sm shadow-brand-900/40 ring-1 ring-inset ring-white/15">
+          P
         </div>
         <div>
-          <p className="font-semibold text-gray-900 leading-tight">PawShop Ops</p>
-          <p className="text-xs text-gray-500">Commerce workspace</p>
+          <p data-brand-text className="font-display font-semibold text-white leading-tight tracking-tight">PawShop</p>
+          <p data-brand-subtext className="text-[11px] uppercase tracking-[0.14em] text-brand-300">Commerce Ops</p>
         </div>
       </div>
 
-      <nav className="flex-1 px-3 py-4 space-y-1">
+      <nav className="flex-1 px-2 py-4 space-y-1">
         {navItems.map(({ href, label, icon: Icon, exact }) => {
           const active = isActive(href, exact);
           return (
@@ -65,23 +63,24 @@ export default function Sidebar({ account }: { account: { email: string; role: s
               key={href}
               href={href}
               data-testid={`nav-${label.toLowerCase().replace(/\s+/g, "-")}`}
-              className={`flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium transition-colors ${
+              data-nav-active={active || undefined}
+              className={`flex items-center gap-3 rounded-md px-4 py-2.5 text-sm font-medium transition-all ${
                 active
-                  ? "bg-indigo-50 text-indigo-700"
-                  : "text-gray-600 hover:bg-gray-100 hover:text-gray-900"
+                  ? "bg-gradient-to-b from-brand-500 to-brand-600 text-white shadow-sm shadow-brand-900/30 ring-1 ring-inset ring-white/15"
+                  : "text-stone-500 hover:bg-stone-100 hover:text-stone-900"
               }`}
             >
-              <Icon size={18} />
+              <Icon size={17} strokeWidth={active ? 2.25 : 1.75} />
               {label}
             </Link>
           );
         })}
       </nav>
 
-      <div className="px-4 py-4 border-t border-gray-200">
+      <div className="px-4 py-4 border-t border-stone-200">
         {account && <div className="mb-3"><AccountMenu email={account.email} role={account.role} /></div>}
-        <div className="mb-3 flex items-center gap-2 rounded-lg bg-emerald-50 px-3 py-2 text-xs font-medium text-emerald-700"><ShieldCheck size={14} /> Tenant data protected</div>
-        <p className="text-xs text-gray-400 text-center">PawShop Ops v2.0</p>
+        <div data-chip="emerald" className="mb-3 flex items-center gap-2 rounded-md bg-gradient-to-b from-emerald-500 to-emerald-600 px-3 py-2 text-xs font-medium text-white shadow-sm shadow-emerald-900/20 ring-1 ring-inset ring-white/15"><ShieldCheck size={14} /> Tenant data protected</div>
+        <p className="text-xs text-stone-400 text-center">PawShop Ops v2.0</p>
       </div>
     </aside>
   );

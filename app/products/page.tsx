@@ -46,27 +46,26 @@ export default async function ProductsPage({ searchParams }: ProductsPageProps) 
 
   return (
     <div data-testid="products-page">
-      <div className="flex items-center justify-between mb-6">
-        <div>
-          <h1 className="text-2xl font-bold text-gray-900">Products</h1>
-          <p className="text-sm text-gray-500 mt-1">
-            {products.length} product{products.length !== 1 ? "s" : ""} found
-          </p>
-        </div>
-        <Link href="/products/new" className="btn-primary" data-testid="btn-add-product">
+      <div className="mb-6">
+        <p className="text-[11px] uppercase tracking-[0.14em] text-stone-400">
+          {products.length} product{products.length !== 1 ? "s" : ""}
+        </p>
+        <h1 className="mt-1 font-display text-2xl font-semibold tracking-tight text-stone-900">Products</h1>
+      </div>
+
+      <div className="flex flex-col gap-3 border-b border-stone-200 pb-4 sm:flex-row sm:items-center sm:justify-between">
+        <Suspense fallback={<div className="h-10 w-full max-w-xl bg-stone-100 rounded-md animate-pulse" />}>
+          <div className="max-w-xl flex-1">
+            <SearchFilter />
+          </div>
+        </Suspense>
+        <Link href="/products/new" className="btn-primary shrink-0" data-testid="btn-add-product">
           <Plus size={16} />
           Add Product
         </Link>
       </div>
 
-      <div className="card">
-        <div className="p-4 border-b border-gray-100">
-          <Suspense fallback={<div className="h-10 bg-gray-100 rounded-lg animate-pulse" />}>
-            <SearchFilter />
-          </Suspense>
-        </div>
-        <ProductTable products={products} />
-      </div>
+      <ProductTable products={products} />
     </div>
   );
 }

@@ -173,57 +173,58 @@ export default function ImportWorkspace({ organizations }: { organizations: Orga
     <div className="mx-auto max-w-6xl" data-testid="import-workspace">
       <div className="mb-8 flex flex-col justify-between gap-4 sm:flex-row sm:items-end">
         <div>
-          <div className="mb-2 flex items-center gap-2 text-xs font-semibold uppercase tracking-[0.14em] text-indigo-600">
+          <div className="mb-2 flex items-center gap-2 text-xs font-semibold uppercase tracking-[0.14em] text-accent">
             <ShieldCheck size={15} /> Staging workspace
           </div>
-          <h1 className="text-3xl font-bold tracking-tight text-slate-950">Import product data</h1>
-          <p className="mt-2 text-sm text-slate-500">Validate every row before anything reaches production.</p>
+          <h1 className="font-display text-3xl font-semibold tracking-tight text-stone-950">Import product data</h1>
+          <p className="mt-2 text-sm text-stone-500">Validate every row before anything reaches production.</p>
         </div>
-        <label className="flex items-center rounded-lg border border-slate-200 bg-white px-3 py-2 text-xs text-slate-500 shadow-sm">
+        <label className="flex items-center border border-stone-200 bg-surface px-3 py-2 text-xs text-stone-500 shadow-sm">
           Workspace
-          <select aria-label="Import workspace" value={organizationId} onChange={(event) => setOrganizationId(event.target.value)} className="ml-1 bg-transparent font-semibold text-slate-800 outline-none">
+          <select aria-label="Import workspace" value={organizationId} onChange={(event) => setOrganizationId(event.target.value)} className="ml-1 bg-transparent font-semibold text-stone-800 outline-none">
             {organizations.length === 0 && <option value="">No workspace available</option>}
             {organizations.map((organization) => <option key={organization.id} value={organization.id}>{organization.name}</option>)}
           </select>
         </label>
       </div>
 
-      <ol className="mb-8 grid grid-cols-4 overflow-hidden rounded-xl border border-slate-200 bg-white shadow-sm">
+      <ol className="mb-8 flex items-center gap-2 border-b border-stone-200 pb-5">
         {["Upload", "Map columns", "Review", "Complete"].map((label, index) => {
           const number = index + 1;
           const active = step === number;
           const complete = step > number;
           return (
-            <li key={label} className={`flex items-center gap-3 border-r border-slate-100 px-3 py-4 last:border-0 ${active ? "bg-indigo-50/70" : ""}`}>
-              <span className={`flex h-7 w-7 shrink-0 items-center justify-center rounded-full text-xs font-bold ${complete ? "bg-emerald-500 text-white" : active ? "bg-indigo-600 text-white" : "bg-slate-100 text-slate-400"}`}>
-                {complete ? <Check size={14} /> : number}
+            <li key={label} className="flex flex-1 items-center gap-2.5">
+              <span className={`flex h-6 w-6 shrink-0 items-center justify-center rounded-full text-xs font-bold tabular-nums ${complete ? "bg-gradient-to-b from-emerald-500 to-emerald-600 text-white shadow-sm shadow-emerald-900/30" : active ? "bg-gradient-to-b from-brand-500 to-brand-600 text-white shadow-sm shadow-brand-900/30" : "border border-stone-300 text-stone-400"}`}>
+                {complete ? <Check size={12} /> : number}
               </span>
-              <span className={`hidden text-sm font-medium sm:block ${active ? "text-indigo-800" : "text-slate-500"}`}>{label}</span>
+              <span className={`hidden text-sm font-medium sm:block ${active ? "text-stone-900" : "text-stone-400"}`}>{label}</span>
+              {index < 3 && <span className="h-px flex-1 bg-stone-200" />}
             </li>
           );
         })}
       </ol>
 
       {step === 1 && (
-        <section className="card overflow-hidden">
-          <div className="flex flex-col justify-between gap-4 border-b border-slate-100 px-6 py-5 sm:flex-row sm:items-center">
+        <section className="border-t-2 border-stone-900 bg-surface shadow-sm">
+          <div className="flex flex-col justify-between gap-4 border-b border-stone-100 px-6 py-5 sm:flex-row sm:items-center">
             <div>
-              <h2 className="font-semibold text-slate-900">Choose a CSV file</h2>
-              <p className="mt-1 text-sm text-slate-500">UTF-8 CSV, up to 10 MB. The first row must contain column names.</p>
+              <h2 className="font-display font-semibold text-stone-900">Choose a CSV file</h2>
+              <p className="mt-1 text-sm text-stone-500">UTF-8 CSV, up to 10 MB. The first row must contain column names.</p>
             </div>
             <button type="button" onClick={downloadTemplate} className="btn-secondary shrink-0" data-testid="download-template">
               <Download size={16} /> Download CSV template
             </button>
           </div>
           <div className="p-6">
-            <label className="group flex min-h-72 cursor-pointer flex-col items-center justify-center rounded-xl border-2 border-dashed border-slate-300 bg-slate-50/60 px-6 text-center transition hover:border-indigo-400 hover:bg-indigo-50/30">
+            <label className="group flex min-h-72 cursor-pointer flex-col items-center justify-center rounded-xl border-2 border-dashed border-stone-300 bg-stone-50/60 px-6 text-center transition hover:border-brand-400 hover:bg-brand-50/30">
               <input data-testid="csv-file" type="file" accept=".csv,text/csv" className="sr-only" onChange={loadFile} />
-              <span className="mb-4 flex h-14 w-14 items-center justify-center rounded-2xl bg-white text-indigo-600 shadow-sm ring-1 ring-slate-200 group-hover:scale-105">
+              <span className="mb-4 flex h-14 w-14 items-center justify-center rounded-2xl bg-gradient-to-b from-brand-500 to-brand-600 text-white shadow-md shadow-brand-900/30 ring-1 ring-inset ring-white/15 group-hover:scale-105">
                 <UploadCloud size={25} />
               </span>
-              <span className="font-semibold text-slate-900">Drop your CSV here, or click to browse</span>
-              <span className="mt-2 text-sm text-slate-500">A sample file is preloaded so you can explore the workflow.</span>
-              <span className="mt-5 inline-flex items-center gap-2 rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm font-medium text-slate-700 shadow-sm">
+              <span className="font-display font-semibold text-stone-900">Drop your CSV here, or click to browse</span>
+              <span className="mt-2 text-sm text-stone-500">A sample file is preloaded so you can explore the workflow.</span>
+              <span className="mt-5 inline-flex items-center gap-2 rounded-lg border border-stone-200 bg-surface px-3 py-2 text-sm font-medium text-stone-700 shadow-sm">
                 <FileSpreadsheet size={16} className="text-emerald-600" /> {fileName} · {parsed.rows.length} rows
               </span>
             </label>
@@ -232,46 +233,46 @@ export default function ImportWorkspace({ organizations }: { organizations: Orga
       )}
 
       {step === 2 && (
-        <section className="card overflow-hidden">
-          <div className="border-b border-slate-100 px-6 py-5">
-            <h2 className="font-semibold text-slate-900">Map source columns</h2>
-            <p className="mt-1 text-sm text-slate-500">Match the uploaded headings to the production product fields.</p>
+        <section className="border-t-2 border-stone-900 bg-surface shadow-sm">
+          <div className="border-b border-stone-100 px-6 py-5">
+            <h2 className="font-display font-semibold text-stone-900">Map source columns</h2>
+            <p className="mt-1 text-sm text-stone-500">Match the uploaded headings to the production product fields.</p>
           </div>
-          <div className="divide-y divide-slate-100">
+          <div className="divide-y divide-stone-100">
             {parsed.headers.map((header) => (
               <div key={header} className="grid items-center gap-4 px-6 py-4 sm:grid-cols-[1fr_32px_1fr]">
                 <div>
-                  <p className="text-xs font-medium uppercase tracking-wide text-slate-400">CSV column</p>
-                  <p className="mt-1 font-mono text-sm font-medium text-slate-800">{header}</p>
+                  <p className="text-xs font-medium uppercase tracking-wide text-stone-400">CSV column</p>
+                  <p className="mt-1 font-mono text-sm font-medium text-stone-800">{header}</p>
                 </div>
-                <ArrowRight size={16} className="hidden text-slate-300 sm:block" />
+                <ArrowRight size={16} className="hidden text-stone-300 sm:block" />
                 <select aria-label={`Map ${header}`} className="form-input" value={mapping[header] ?? "ignore"} onChange={(event) => setMapping((current) => ({ ...current, [header]: event.target.value as ProductField }))}>
                   {Object.entries(fieldLabels).map(([value, label]) => <option key={value} value={value}>{label}</option>)}
                 </select>
               </div>
             ))}
           </div>
-          {!mappingComplete && <p className="mx-6 mb-5 rounded-lg bg-amber-50 px-4 py-3 text-sm text-amber-800">Map product name, category, price, and stock to continue.</p>}
+          {!mappingComplete && <p className="mx-6 mb-5 rounded-lg bg-amber-50 dark:bg-amber-950/40 px-4 py-3 text-sm text-amber-800 dark:text-amber-300">Map product name, category, price, and stock to continue.</p>}
         </section>
       )}
 
       {step === 3 && (
         <section className="space-y-5">
-          <div className="grid gap-3 sm:grid-cols-3">
+          <div className="grid grid-cols-3 gap-2">
             <Summary label="Ready to import" value={counts.ready} color="emerald" />
             <Summary label="Duplicates skipped" value={counts.warning} color="amber" />
             <Summary label="Errors blocked" value={counts.error} color="rose" />
           </div>
-          <div className="card overflow-hidden">
-            <div className="flex items-center justify-between border-b border-slate-100 px-5 py-4">
-              <div><h2 className="font-semibold text-slate-900">Staging review</h2><p className="mt-0.5 text-xs text-slate-500">Only valid, non-duplicate rows will be promoted.</p></div>
-              <span className="rounded-full bg-slate-100 px-2.5 py-1 text-xs font-medium text-slate-600">{reviewedRows.length} rows</span>
+          <div className="bg-surface shadow-sm">
+            <div className="flex items-center justify-between border-b border-stone-200 px-5 py-4">
+              <div><h2 className="font-display font-semibold text-stone-900">Staging review</h2><p className="mt-0.5 text-xs text-stone-500">Only valid, non-duplicate rows will be promoted.</p></div>
+              <span data-chip="stone" className="rounded-full bg-gradient-to-b from-inverse-from to-inverse-to px-2.5 py-1 text-xs font-medium text-white shadow-sm">{reviewedRows.length} rows</span>
             </div>
             <div className="overflow-x-auto">
               <table className="w-full min-w-[760px] text-left text-sm">
-                <thead className="bg-slate-50 text-xs uppercase tracking-wide text-slate-500"><tr><th className="px-5 py-3">Row</th><th className="px-5 py-3">Product</th><th className="px-5 py-3">Category</th><th className="px-5 py-3">Price</th><th className="px-5 py-3">Stock</th><th className="px-5 py-3">Validation</th></tr></thead>
-                <tbody className="divide-y divide-slate-100">
-                  {reviewedRows.map((item) => <tr key={item.index} className={item.state === "error" ? "bg-rose-50/40" : item.state === "warning" ? "bg-amber-50/40" : ""}><td className="px-5 py-4 font-mono text-xs text-slate-400">{item.index}</td><td className="px-5 py-4 font-medium text-slate-900">{mappedValue(item.row, "name")}</td><td className="px-5 py-4 text-slate-600">{mappedValue(item.row, "category")}</td><td className="px-5 py-4 text-slate-600">${mappedValue(item.row, "price")}</td><td className="px-5 py-4 text-slate-600">{mappedValue(item.row, "stock")}</td><td className="px-5 py-4"><span className={`inline-flex items-center gap-1.5 text-xs font-medium ${item.state === "ready" ? "text-emerald-700" : item.state === "warning" ? "text-amber-700" : "text-rose-700"}`}>{item.state === "ready" ? <CheckCircle2 size={15} /> : <XCircle size={15} />}{item.message}</span></td></tr>)}
+                <thead data-table-head className="bg-gradient-to-b from-inverse-from to-inverse-to text-xs uppercase tracking-wide text-white/80 shadow-sm"><tr><th className="px-5 py-3">Row</th><th className="px-5 py-3">Product</th><th className="px-5 py-3">Category</th><th className="px-5 py-3">Price</th><th className="px-5 py-3">Stock</th><th className="px-5 py-3">Validation</th></tr></thead>
+                <tbody className="divide-y divide-stone-100">
+                  {reviewedRows.map((item) => <tr key={item.index} className={item.state === "error" ? "bg-rose-50/40 dark:bg-rose-950/30" : item.state === "warning" ? "bg-amber-50/40 dark:bg-amber-950/30" : ""}><td className="px-5 py-4 font-mono text-xs text-stone-400">{item.index}</td><td className="px-5 py-4 font-medium text-stone-900">{mappedValue(item.row, "name")}</td><td className="px-5 py-4 text-stone-600">{mappedValue(item.row, "category")}</td><td className="px-5 py-4 text-stone-600">${mappedValue(item.row, "price")}</td><td className="px-5 py-4 text-stone-600">{mappedValue(item.row, "stock")}</td><td className="px-5 py-4"><span className={`inline-flex items-center gap-1.5 text-xs font-medium ${item.state === "ready" ? "text-emerald-700 dark:text-emerald-400" : item.state === "warning" ? "text-amber-700 dark:text-amber-400" : "text-rose-700 dark:text-rose-300"}`}>{item.state === "ready" ? <CheckCircle2 size={15} /> : <XCircle size={15} />}{item.message}</span></td></tr>)}
                 </tbody>
               </table>
             </div>
@@ -280,18 +281,18 @@ export default function ImportWorkspace({ organizations }: { organizations: Orga
       )}
 
       {step === 4 && (
-        <section className="card px-6 py-16 text-center" data-testid="import-complete">
-          <span className="mx-auto flex h-16 w-16 items-center justify-center rounded-full bg-emerald-100 text-emerald-600"><CheckCircle2 size={32} /></span>
-          <h2 className="mt-5 text-2xl font-bold text-slate-950">Import promoted safely</h2>
-          <p className="mx-auto mt-2 max-w-md text-sm leading-6 text-slate-500">{promotionResult?.promoted ?? counts.ready} products moved from staging to production. {(promotionResult?.duplicates ?? counts.warning) + (promotionResult?.errors ?? counts.error)} blocked rows remain available for audit.</p>
-          <div className="mx-auto mt-6 inline-flex items-center gap-2 rounded-lg bg-slate-50 px-4 py-3 text-xs text-slate-600 ring-1 ring-slate-200"><ShieldCheck size={15} className="text-indigo-600" /> Transaction committed · duplicate-safe · tenant scoped</div>
+        <section className="border-t-2 border-stone-900 bg-surface shadow-sm px-6 py-16 text-center" data-testid="import-complete">
+          <span className="mx-auto flex h-16 w-16 items-center justify-center rounded-full bg-gradient-to-b from-emerald-500 to-emerald-600 text-white shadow-lg shadow-emerald-900/30 ring-1 ring-inset ring-white/15"><CheckCircle2 size={32} /></span>
+          <h2 className="mt-5 font-display text-2xl font-semibold text-stone-950">Import promoted safely</h2>
+          <p className="mx-auto mt-2 max-w-md text-sm leading-6 text-stone-500">{promotionResult?.promoted ?? counts.ready} products moved from staging to production. {(promotionResult?.duplicates ?? counts.warning) + (promotionResult?.errors ?? counts.error)} blocked rows remain available for audit.</p>
+          <div data-chip="stone" className="mx-auto mt-6 inline-flex items-center gap-2 rounded-lg bg-gradient-to-b from-inverse-from to-inverse-to px-4 py-3 text-xs text-white shadow-sm"><ShieldCheck size={15} /> Transaction committed · duplicate-safe · tenant scoped</div>
         </section>
       )}
 
       <div className="mt-6 flex items-center justify-between">
         <button className="btn-secondary disabled:invisible" disabled={step === 1 || step === 4} onClick={() => setStep((value) => value - 1)}><ArrowLeft size={16} /> Back</button>
         {step < 3 && <button data-testid="import-next" className="btn-primary" disabled={step === 2 && !mappingComplete} onClick={() => setStep((value) => value + 1)}>Continue <ArrowRight size={16} /></button>}
-        {step === 3 && <div className="flex flex-col items-end gap-2">{promotionError && <p className="text-sm text-rose-600" role="alert">{promotionError}</p>}<button data-testid="promote-import" className="btn-primary" disabled={isPromoting || !organizationId} onClick={promoteImport}>{isPromoting ? <><Loader2 size={16} className="animate-spin" /> Promoting…</> : <>Promote {counts.ready} valid rows <ArrowRight size={16} /></>}</button></div>}
+        {step === 3 && <div className="flex flex-col items-end gap-2">{promotionError && <p className="text-sm text-rose-600 dark:text-rose-400" role="alert">{promotionError}</p>}<button data-testid="promote-import" className="btn-primary" disabled={isPromoting || !organizationId} onClick={promoteImport}>{isPromoting ? <><Loader2 size={16} className="animate-spin" /> Promoting…</> : <>Promote {counts.ready} valid rows <ArrowRight size={16} /></>}</button></div>}
         {step === 4 && promoted && <button className="btn-secondary" onClick={() => { setPromoted(false); setPromotionResult(null); setStep(1); }}>Start another import</button>}
       </div>
     </div>
@@ -299,6 +300,15 @@ export default function ImportWorkspace({ organizations }: { organizations: Orga
 }
 
 function Summary({ label, value, color }: { label: string; value: number; color: "emerald" | "amber" | "rose" }) {
-  const styles = { emerald: "border-emerald-200 bg-emerald-50 text-emerald-700", amber: "border-amber-200 bg-amber-50 text-amber-700", rose: "border-rose-200 bg-rose-50 text-rose-700" };
-  return <div className={`rounded-xl border px-5 py-4 ${styles[color]}`}><p className="text-xs font-semibold uppercase tracking-wide opacity-80">{label}</p><p className="mt-1 text-3xl font-bold">{value}</p></div>;
+  const styles = {
+    emerald: "from-emerald-500 to-emerald-700 shadow-emerald-900/30",
+    amber: "from-amber-500 to-amber-700 shadow-amber-900/30",
+    rose: "from-rose-500 to-rose-700 shadow-rose-900/30",
+  };
+  return (
+    <div data-stat-tile data-tone={color} className={`bg-gradient-to-br px-5 py-4 text-white shadow-md ring-1 ring-inset ring-white/15 ${styles[color]}`}>
+      <p data-tile-icon className="text-[11px] font-medium uppercase tracking-[0.1em] text-white/70">{label}</p>
+      <p data-tile-value className="mt-1 font-display text-3xl font-semibold tabular-nums drop-shadow-sm">{value}</p>
+    </div>
+  );
 }
