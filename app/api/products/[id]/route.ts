@@ -34,7 +34,7 @@ export async function PUT(request: NextRequest, { params }: RouteParams) {
     const { id } = await params;
     const body: ProductFormData = await request.json();
 
-    const { name, category, price, stock, status, image_url, description } = body;
+    const { name, category, price, stock, status, image_url, description, organization_id } = body;
 
     if (!name?.trim()) {
       return NextResponse.json({ error: "Product name is required" }, { status: 400 });
@@ -49,6 +49,7 @@ export async function PUT(request: NextRequest, { params }: RouteParams) {
     const { data, error } = await supabase
       .from("products")
       .update({
+        ...(organization_id ? { organization_id } : {}),
         name: name.trim(),
         category,
         price,

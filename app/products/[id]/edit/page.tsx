@@ -30,6 +30,12 @@ export default async function EditProductPage({ params }: EditProductPageProps) 
     notFound();
   }
 
+  const supabase = await createClient();
+  const { data: organizations } = await supabase
+    .from("organizations")
+    .select("id, name")
+    .order("name");
+
   return (
     <div data-testid="edit-product-page">
       <div className="mb-6">
@@ -48,7 +54,7 @@ export default async function EditProductPage({ params }: EditProductPageProps) 
       </div>
 
       <div className="max-w-2xl">
-        <ProductForm initialData={product} isEdit />
+        <ProductForm initialData={product} isEdit organizations={organizations ?? []} />
       </div>
     </div>
   );

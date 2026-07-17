@@ -69,7 +69,7 @@ export default function ProductForm({ initialData, isEdit = false, organizations
   function validate(): boolean {
     const newErrors: Partial<Record<keyof ProductFormData, string>> = {};
 
-    if (!isEdit && organizations.length > 0 && !formData.organization_id) {
+    if (organizations.length > 0 && !formData.organization_id) {
       newErrors.organization_id = "Workspace is required";
     }
 
@@ -194,14 +194,21 @@ export default function ProductForm({ initialData, isEdit = false, organizations
       <div className="space-y-5 p-6">
         <p className="text-[11px] font-medium uppercase tracking-[0.1em] text-stone-400">Product details</p>
 
-        {!isEdit && organizations.length > 0 && (
+        {organizations.length > 0 && (!isEdit || !initialData?.organization_id) && (
           <div>
-            <label htmlFor="organization_id" className="form-label">Workspace <span className="text-rose-500">*</span></label>
+            <label htmlFor="organization_id" className="form-label">
+              Workspace <span className="text-rose-500">*</span>
+            </label>
             <select id="organization_id" name="organization_id" className="form-input" required value={formData.organization_id ?? ""} onChange={handleChange} data-testid="input-organization">
               <option value="">Select a workspace</option>
               {organizations.map((organization) => <option key={organization.id} value={organization.id}>{organization.name}</option>)}
             </select>
             {errors.organization_id && <p className="mt-1 text-xs text-rose-600 dark:text-rose-400">{errors.organization_id}</p>}
+            {isEdit && !initialData?.organization_id && (
+              <p className="mt-1 text-xs text-amber-600">
+                This older product is not assigned to a workspace yet. Choose one to enable image uploads.
+              </p>
+            )}
           </div>
         )}
 
