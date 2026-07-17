@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { LayoutDashboard, Package, PlusCircle, Upload, Users, ShieldCheck } from "lucide-react";
+import { Building2, LayoutDashboard, Package, PlusCircle, Upload, Users, ShieldCheck } from "lucide-react";
 import AccountMenu from "./AccountMenu";
 
 const navItems = [
@@ -40,6 +40,9 @@ const navItems = [
 
 export default function Sidebar({ account }: { account: { email: string; role: string } | null }) {
   const pathname = usePathname();
+  const visibleNavItems = account?.role === "platform_admin"
+    ? [...navItems, { href: "/tenants", label: "Tenants", icon: Building2, exact: false }]
+    : navItems;
 
   function isActive(href: string, exact: boolean) {
     if (exact) return pathname === href;
@@ -62,7 +65,7 @@ export default function Sidebar({ account }: { account: { email: string; role: s
       </div>
 
       <nav className="flex-1 px-2 py-4 space-y-1">
-        {navItems.map(({ href, label, icon: Icon, exact }) => {
+        {visibleNavItems.map(({ href, label, icon: Icon, exact }) => {
           const active = isActive(href, exact);
           return (
             <Link
